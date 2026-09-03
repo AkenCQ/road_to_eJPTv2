@@ -17,7 +17,7 @@ Ejecutamos nmap a la IP con los siguientes parámetros
 nmap -p- --open -T5 -n -Pn -vvv 10.129.63.24 -oG targeted
 ```
 
-![[eJPTv2/imgs/Pasted image 20260828122522.png]]
+![[imgs 1/Pasted image 20260828122522.png]]
 
 Podemos ver que tenemos el puerto 22 (ssh) y 80 (http) abiertos. Intuimos que hay un servicio web, por lo que aplicamos otro nmap especificamente para ese puerto.
 
@@ -25,7 +25,7 @@ Podemos ver que tenemos el puerto 22 (ssh) y 80 (http) abiertos. Intuimos que ha
 nmap -p80 -sCV 10.129.63.24 -oN service # Para ver la versión y aplicar script más comunes
 ```
 
-![[eJPTv2/imgs/Pasted image 20260828122746.png]]
+![[imgs 1/Pasted image 20260828122746.png]]
 
 Esta corriendo un servicio apache2 versión 2.4.41, con esto podemos identificar el codename buscando la versión + launchpad -> Resultado: Focal
 
@@ -37,15 +37,15 @@ nmap --script http-enum -p80 10.129.63.24 -oN targeted
 
 No encontramos nada, pero de igual forma podemos usar otra herramienta como gobuster para buscar direcciones:
 
-![[eJPTv2/imgs/gobuster_alert.png|1000]]
+![[imgs 1/gobuster_alert.png|1000]]
 
 Entonces entramos a la página web http://alert.htb
 
-![[eJPTv2/imgs/markdown_viewer.png|1000]]
+![[imgs 1/markdown_viewer.png|1000]]
 
 Usamos la ruta encontrada por gobuster, asi que entramos al directorio messages.php, pero vemos que no tenemos permisos, por lo que asumimos que es de un administrador.
 
-![[eJPTv2/imgs/messages_php.png]]
+![[imgs 1/messages_php.png]]
 
 En la página principal encontramos un visor de archivos markdown con subida de archivos .md, lo cual podría ser vulnerable a un ataque Markdown XSS. Para comprobarlo, escribimos código JS para mandar una alerta a ver si nos la muestra en un archivo markdown para subirlo.
 
@@ -57,7 +57,7 @@ En la página principal encontramos un visor de archivos markdown con subida de 
 
 Lo subimos a la página y efectivamente podemos ver que es vulnerable a XSS vía subida de archivos markdown.
 
-![[eJPTv2/imgs/alert_htb.png|1000]]
+![[imgs 1/alert_htb.png|1000]]
 
 Si le damos a share markdown, podemos ver que nos abre otra pestaña, nos da una cadena cifrada .md
 
@@ -67,7 +67,7 @@ Navegando por las diferentes cabeceras, nos pone un mensaje de que el email que 
 - Si el renderer convierte la URL en un recurso que el navegador carga automáticamente (`img`, `iframe`, etc.) → **sí** hace GET al abrir el mensaje.
 
 
-![[eJPTv2/imgs/contact_us.png|1000]]
+![[imgs 1/contact_us.png|1000]]
 
 Entonces vemos que esta cargando automáticamente lo que mandemos por mensaje, por lo que nos podemos aprovechar de ello y enviarle el código malicioso en JS (XSS).
 
@@ -89,7 +89,7 @@ http://alert.htb/visualizer.php?link_share=6a91cc41118481.81247824.md
 
 De tal forma que se lo enviamos en "Contact us" al administrador pegando la url en el mensaje, y podemos ver que en Python tenemos un registro de solicitud GET al archivo del servidor.
 
-![[eJPTv2/imgs/registro_admin.png]] (Claramente pone 404 porque aún no hemos creado dicho archivo)
+![[imgs 1/registro_admin.png]] (Claramente pone 404 porque aún no hemos creado dicho archivo)
 
 Entonces el contenido de ese pwn.js es:
 
@@ -105,7 +105,7 @@ filter.send();
 
 Ahora volvemos a cargar el archivo .md, para más detalle, el siguiente flujo:
 
-![[eJPTv2/imgs/flujo_obtener_html.png|1000]]
+![[imgs 1/flujo_obtener_html.png|1000]]
 
 Decodificamos a texto normal:
 
