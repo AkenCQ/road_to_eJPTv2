@@ -17,7 +17,7 @@ Ejecutamos nmap a la IP con los siguientes parámetros
 nmap -p- --open -T5 -n -Pn -vvv 10.129.63.24 -oG targeted
 ```
 
-![[week 1/imgs 1/Pasted image 20260828122522.png]]
+![[/week 1/imgs 1/Pasted image 20260828122522.png]]
 
 Podemos ver que tenemos el puerto 22 (ssh) y 80 (http) abiertos. Intuimos que hay un servicio web, por lo que aplicamos otro nmap especificamente para ese puerto.
 
