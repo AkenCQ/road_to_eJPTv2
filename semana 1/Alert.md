@@ -25,7 +25,7 @@ Podemos ver que tenemos el puerto 22 (ssh) y 80 (http) abiertos. Intuimos que ha
 nmap -p80 -sCV 10.129.63.24 -oN service # Para ver la versión y aplicar script más comunes
 ```
 
-![[imgs 1/Pasted image 20260828122746.png]]
+![[../imgs 1/Pasted image 20260828122746.png]]
 
 Esta corriendo un servicio apache2 versión 2.4.41, con esto podemos identificar el codename buscando la versión + launchpad -> Resultado: Focal
 
