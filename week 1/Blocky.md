@@ -17,7 +17,7 @@ nmap -p- --open -sS -sV -T5 -n -Pn -vvv 10.129.66.14 -oG scanPorts
 # -sS (Stealth Scan): No realiza el Three Way Handshake 
 ```
 
-![[blocky_nmap.png]]
+![blocky_nmap](imgs%201/blocky_nmap.png)
 
 Podemos ver los puertos **21,22,80 y 25565** abiertos y sus respectivas versiones. 
 
@@ -25,7 +25,7 @@ Podemos ver los puertos **21,22,80 y 25565** abiertos y sus respectivas versione
 
 Dado a que vemos el puerto ftp abierto, intentamos conectarnos a este con el usuario anonymous (que no pide contraseña).
 
-![[blocky_ftp.png]]
+![blocky_ftp](imgs%201/blocky_ftp.png)
 
 Pero no se puede dado a que necesitamos un usuario y contraseña.
 
@@ -33,15 +33,15 @@ Pero no se puede dado a que necesitamos un usuario y contraseña.
 
 Haremos un escaneo para ver el servicio web que está utlizando y así poder recolectar más información sobre el sistema.
 
-![[p80_blocky.png|700]]
+![p80_blocky](imgs%201/p80_blocky.png)
 
 Utiliza un **Apache httpd 2.4.18**, para saber el codename buscamos el launchpad  y nos pondrá que es **Ubuntu Xenial**
 
 Ahora entramos a la página web y exploramos un poco por ella, pero antes debemos incluir el nombre del host para que nos aparezca la página
 
-![[host_blocky-1.png|700]]
+![host_blocky-1](imgs%201/host_blocky-1.png)
 
-Es una página de un servidor de minecraft y explorando encontramos que utiliza wordpress, tiene un panel de login, el archivo xmlrpc.php solo recibe peticiones POST (este archvio debe estar deshabilitado) y que la versión de Wordpress es 4.8 (según nos descargamos un archivo que encontramos en la web del servidor de Minecraft).
+Es una página de un servidor de minecraft y explorando encontramos que utiliza wordpress, tiene un panel de login, el archivo xmlrpc.php solo recibe peticiones POST (este archvio debe estar desha[...]
 
 Podemos obtener más información con whatweb
 
@@ -49,16 +49,16 @@ Podemos obtener más información con whatweb
 whatweb http://blocky.htb
 ```
 
-![[eJPTv2/imgs/blocky_whatweb.png]]
+![blocky_whatweb](imgs%201/blocky_whatweb.png)
 
-![[eJPTv2/imgs/blocky_information.png]]
+![blocky_information](imgs%201/blocky_information.png)
 
 En la página vemos al usuario "Notch" quien realizó una publicación, por lo que asumimos que es un usuario válido para Wordpress
 
-![[eJPTv2/imgs/blocky_user.png]]
+![blocky_user](imgs%201/blocky_user.png)
 
 Y acertamos porque nos dice que la password para el usuario notch es incorrecta.
-![[eJPTv2/imgs/blocky_notch.png|400x600]]
+![blocky_notch](imgs%201/blocky_notch.png)
 
 ## SSH
 
@@ -68,7 +68,7 @@ Dado a que tenemos al usuario notch, podemos identificar también si es un usuar
 searchsploit ssh user enumeration
 ```
 
-![[eJPTv2/imgs/blocky_searchsploit.png]]
+![blocky_searchsploit](imgs%201/blocky_searchsploit.png)
 
 Y encontramos exploit que coinciden con la versión que tenemos del servicio nmap del servidor (<>). Nos traemos el script a nuestra carpeta actual
 
@@ -95,12 +95,12 @@ Comenzamos haciendo un fuzzing a blocky.htb utilizando ffuf
 ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/DirBuster-2007_directory-list-2.3-medium.txt:FUZZ -u "http://blocky.htb/FUZZ"
 ```
 
-![[eJPTv2/imgs/blocky_fuzzing.png]]
+![blocky_fuzzing](imgs%201/blocky_fuzzing.png)
 
 Encontramos una ruta /plugin el cual tiene dos archivos, los descargamos.
 
 
-![[eJPTv2/imgs/blocky_files.png|700]]
+![blocky_files](imgs%201/blocky_files.png)
 
 Los descargamos y los traemos al directorio de trabajo actual.
 
@@ -110,11 +110,11 @@ Utilizamos el siguiente programa para ver la estructura del archivo
 java -jar /usr/share/jd-gui/jd-gui.jar
 ```
 
-![[eJPTv2/imgs/blocky_jfuid.png|700]]
+![blocky_jfuid](imgs%201/blocky_jfuid.png)
 
 Y buscando en el archivo BlockyCore.class obtenemos el usuario y la contraseña
 
-![[eJPTv2/imgs/blocky_class.png|800]]
+![blocky_class](imgs%201/blocky_class.png)
 
 Credenciales: ``root/8YsqfCTnvxAUeduzjNSXe22``
 
@@ -126,7 +126,7 @@ ssh notch@10.129.66.14
 
 y logramos ingresar a la máquina y ver la flag del usuario
 
-![[eJPTv2/imgs/blocky_notchssh.png]]
+![blocky_notchssh](imgs%201/blocky_notchssh.png)
 
 Buscamos formas de escalar privilegios con la información que nos devuelven los siguientes comandos:
 
@@ -138,6 +138,6 @@ id # Ver a qué grupos pertenece el usuario "notch"
 
 Con el último nos muestra que pertenece al grupo de sudoers, por lo que simplemente podemos hacer un sudo su para cambiar a root y obtener la flag.
 
-![[eJPTv2/imgs/blocky_sudo 1.png]]
+![blocky_sudo 1](imgs%201/blocky_sudo%201.png)
 
-![[eJPTv2/imgs/blocky_sudo.png]]
+![blocky_sudo](imgs%201/blocky_sudo.png)
