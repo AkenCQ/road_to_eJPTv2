@@ -125,6 +125,16 @@ ssh albert@10.129.63.24
 
 Revisamos los servicios internos a la escucha utilizando `ss -nltp` y detectamos el puerto 8080 abierto localmente. Realizamos un reenvío de puertos (Local Port Forwarding) para interactuar con [...]
 
+Para ver procesos del sistema con la información completa:
+```bash
+ps -faux
+# -f: formato completoo (id, pid, hh:ss)
+# -a: todos los procesos, excepto los que estén asociados a una terminal
+# -u: columna del usuario y la hora del CPU actualizada
+# -x: procesos que no están controlados por una terminal (en segundo plano)
+```
+
+
 ```bash
 ssh albert@10.129.63.24 -L 8080:127.0.0.1:8080
 ```
