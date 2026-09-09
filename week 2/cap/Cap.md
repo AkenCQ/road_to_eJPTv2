@@ -6,7 +6,7 @@ IP máquina víctima: 10.129.67.2
 
 Comprobamos que tengamos conexión con la máquina haciendo ping.
 
-![[cap_ping.png]]
+![cap_ping](cap_ping.png)
 
 ttl = 63 -> Máquina Linux
 
@@ -19,7 +19,7 @@ Iniciamos con haciendo nmap hacia la IP víctima para realizar un escaneo de pue
 sudo nmap -p- --open -T5 -sV -vvv -sS -n -Pn 10.129.67.2 -oG scanPorts
 ```
 
-![[cap_nmap.png]]
+![cap_nmap](cap_nmap.png)
 
 Podemos observar que tiene 3 puertos abiertos:
 
@@ -29,35 +29,34 @@ Podemos observar que tiene 3 puertos abiertos:
 
 Echamos un vistazo a la página web para ver qué contiene
 
-![[cap_web.png|900]]
-
+![cap_web](cap_web.png)
 
 Es un Dashboard para monitorizar las conexiones del servidor.
 
-En el panel de la izquierda hay un apartado llamado "Security Snapshot" el cual nos muestra una captura .pcap, la cual guarda una grabación exacta del tráfico de datos que circula por la red. En este caso mostrará 0 porque no hemos hecho nada en la red.
+En el panel de la izquierda hay un apartado llamado "Security Snapshot" el cual nos muestra una captura .pcap, la cual guarda una grabación exacta del tráfico de datos que circula por la red. En[...]
 
-![[cap_pcap.png]]
+![cap_pcap](cap_pcap.png)
 
 En la URL nos muestra que los datos son de la sesión ``/data/1``, si volvemos a pinchar en el Security Snapshot, mostrará la nueva captura como ``/data/2``.
 
-![[cap_data2.png]]
+![cap_data2](cap_data2.png)
 
-Si buscamos por la captura 0, nos mostrará que tiene contenido, por lo que descargamos dicho archivo para analizarlo y descubrir que podemos obtener. Para esta acción, utilizaremos tshark (también se puede usar WireShark).
+Si buscamos por la captura 0, nos mostrará que tiene contenido, por lo que descargamos dicho archivo para analizarlo y descubrir que podemos obtener. Para esta acción, utilizaremos tshark (también [...]
 
 ```bash
 tshark -r 0.pcap tcp.payload 2>/dev/null
 ```
 
-![[cap_0pcap.png]]
+![cap_0pcap](cap_0pcap.png)
 
 Y podemos ver el tráfico de red en el cual se almacenaron las credenciales al momento de que el usuario ``nathan`` se autenticó en el servicio 
 `ftp`. Podriamos ingresar al ftp, pero también tenemos un servicio ssh activo, por lo que podemos autenticarnos allí también.
 
-![[cap_ssh.png]]
+![cap_ssh](cap_ssh.png)
 
 Ingrasamos exitosamente como el usuario `nathan`, entonces vemos la flag del usuario.
 
-![[cap_usertxt.png]]
+![cap_usertxt](cap_usertxt.png)
 
 # 2. Escalar privilegios
 
@@ -68,11 +67,11 @@ find / -perm -4000 -user root 2>/Dev/bull
 getcap -r / 2>/dev/null
 ```
 
-![[cap_getcao.png]]
+![cap_getcao](cap_getcao.png)
 
 Viendo las capabilities, hay una que permite establecer el uid de un usuario en python. Por lo scripteamos un archivo para cambiar le UID de nuestro usuario a 0 (el de root) y lanzar una bash.
 
-![[cap_scriptpy.png]]
+![cap_scriptpy](cap_scriptpy.png)
 
 Damos permisos de ejecución con `chmod` y ejecutamos:
 
@@ -82,4 +81,4 @@ chmod +x test.py
 python3 test.py
 ```
 
-![[cap_final.png]]
+![cap_final](cap_final.png)
