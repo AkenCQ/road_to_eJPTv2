@@ -6,7 +6,7 @@ IP víctima: 10.129.69.176
 
 Comprobamos conectividad con la máquina:
 
-![[lame_ping.png]]
+![lame_ping](lame_ping.png)
 
 TTL = 63 -> Máquina Linux
 
@@ -15,9 +15,9 @@ ___
 
 Realizamos un escaneo de puertos para ver cuáles están abiertos
 
-![[lame_nmap.png]]
+![lame_nmap](lame_nmap.png)
 
-![[lame_servicesv.png]]
+![lame_servicesv](lame_servicesv.png)
 
 [+] Puertos abiertos
 	-> 21 | ftp | vsftpd 2.3.4
@@ -28,15 +28,15 @@ Realizamos un escaneo de puertos para ver cuáles están abiertos
 
 Procedemos a enumerar el servicio `samba` para ver recursos compartidos en la red
 
-![[lame_smbclient.png]]
+![lame_smbclient](lame_smbclient.png)
 
 Ya que vemos la versión de samba `smbd 3.0.20`, podemos buscar vulnerabilidades con `searchsploit`
 
-![[lame_searchploit.png]]
+![lame_searchploit](lame_searchploit.png)
 
 Lo que nos intersa es lograr RCE, asi que tomamos el segundo script que está programado en Ruby para ver qué payload inyecta.
 
-![[lame_scriptpayload.png]]
+![lame_scriptpayload](lame_scriptpayload.png)
 
 Podemos ver que inyecta `"/=nohup"` en un campo username, asi que podemos usar el comando `logon` para conectarnos mediante un recurso compartido.
 
@@ -54,6 +54,6 @@ nc -nlvp 443
 smbclient //10.129.70.127/tmp
 ```
 
-![[lame_usepayload.png]]
+![lame_usepayload](lame_usepayload.png)
 
-![[lame_flags.png]]
+![lame_flags](lame_flags.png)

